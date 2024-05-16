@@ -1,7 +1,7 @@
 # BridgeRNADesigner
 A command line interface for designing Bridge RNAs for Bridge Editing. Accompanies the paper
 ["Bridge RNAs direct modular and programmable recombination of target and 
-donor DNA"](https://www.biorxiv.org/content/10.1101/2024.01.24.577089v1) by Durrant & Perry et al, 2024.
+donor DNA"](https://www.biorxiv.org/content/10.1101/2024.01.24.577089v1) by Durrant & Perry et al. 2024.
 
 ## Dependencies
 * Tested on python 3.8
@@ -9,9 +9,7 @@ donor DNA"](https://www.biorxiv.org/content/10.1101/2024.01.24.577089v1) by Durr
 
 ## Installation
 ```bash
-git clone https://github.com/hsulab-arc/BridgeRNADesigner
-cd BridgeRNADesigner/
-pip install .
+pip install bridgernadesigner
 ```
 
 ## Usage
