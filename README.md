@@ -1,7 +1,7 @@
 # BridgeRNADesigner
-A command line interface for designing Bridge RNAs for Bridge Editing. Accompanies the paper
+A command line interface for designing bridge RNAs for bridge editing. Accompanies the papers
 ["Bridge RNAs direct modular and programmable recombination of target and 
-donor DNA"](https://www.biorxiv.org/content/10.1101/2024.01.24.577089v1) by Durrant & Perry et al. 2024.
+donor DNA"](https://doi.org/10.1038/s41586-024-07552-4), Durrant & Perry et al. (2024), and "Megabase-scale human genome rearrangement with programmable bridge recombinases", Perry et al. (2025).
 
 ## Dependencies
 * Tested on python 3.8
@@ -13,41 +13,34 @@ pip install bridgernadesigner
 ```
 
 ## Usage
-Command to design a Bridge RNA for a given target and donor sequence.
+Command to design a bridge RNA for a given target and donor sequence, and a bridge RNA scaffold.
+
 ```bash
-brna-design --target ATCGGGCCTACGCA --donor ACAGTATCTTGTAT
+brna-design --target ATCGGGCCTACGCA --donor ACAGTATCTTGTAT --scaffold IS622_bRNA_enhanced
 ```
 
 Example output:
 ```bash
-# STOCKHOLM 1.0
-BridgeRNA_tgt_ATCGGGCCTACGCA_dnr_ACAGTATCTTGTAT     AGTGCAGAGAAAATCGGCCAGTTTTCTCTGCCTGCAGTCCGCATGCCGTATCGGGCCTTGGGTTCTAACCTGTTGCGTAGATTTATGCAGCGGACTGCCTTTCTCCCAAAGTGATAAACCGGACAGTATCATGGACCGGTTTTCCCGGTAATCCGTATTTACAAGGCTGGTTTCACT
-#=GC bRNA_template                                  AGTGCAGAGAAAATCGGCCAGTTTTCTCTGCCTGCAGTCCGCATGCCGTNNNNNNNNNTGGGTTCTAACCTGTNNNNNNNNNTTATGCAGCGGACTGCCTTTCTCCCAAAGTGATAAACCGGNNNNNNNNATGGACCGGTTTTCCCGGTAATCCGTNNTTNNNNNNNTGGTTTCACT
-#=GC guides                                         .................................................LLLLLLLCC...............RRRRRCCHH........................................lllllllc..........................rr..rrrcchh..........
-#=GC SS                                             ((.(((((((((((......)))))))))))))(((((((((.(((.............<(((.<>.)))>...............))))))))))))...........((((...<(((..........<.(((((((.....)))))...))....>.........)))>.))))
-//
-```
-This should run very quickly on a Mac or Linux machine. The code can also automatically generate annealing oligos in 
-FASTA format:
-```bash
-brna-design --target ATCGGGCCTACGCA --donor ACAGTATCTTGTAT -of fasta --include-annealing-oligos
-```
-Output:
-```bash
 >BridgeRNA_tgt_ATCGGGCCTACGCA_dnr_ACAGTATCTTGTAT
-AGTGCAGAGAAAATCGGCCAGTTTTCTCTGCCTGCAGTCCGCATGCCGTATCGGGCCTTGGGTTCTAACCTGTTGCGTAGATTTATGCAGCGGACTGCCTTTCTCCCAAAGTGATAAACCGGACAGTATCATGGACCGGTTTTCCCGGTAATCCGTATTTACAAGGCTGGTTTCACT
->BridgeRNA_tgt_ATCGGGCCTACGCA_dnr_ACAGTATCTTGTAT_oligo_anneal_fiveprime_stem_loop_top
-TAGCAGTGCAGAGAAAATCGGCCAGTTTTCTCTGCCTGCAGTCCGCATG
->BridgeRNA_tgt_ATCGGGCCTACGCA_dnr_ACAGTATCTTGTAT_oligo_anneal_fiveprime_stem_loop_btm
-ACGGCATGCGGACTGCAGGCAGAGAAAACTGGCCGATTTTCTCTGCACT
->BridgeRNA_tgt_ATCGGGCCTACGCA_dnr_ACAGTATCTTGTAT_oligo_anneal_tbl_top
-CCGTATCGGGCCTTGGGTTCTAACCTGTTGCGTAGATTTATGCAGCGGACTGCCTTTCTC
->BridgeRNA_tgt_ATCGGGCCTACGCA_dnr_ACAGTATCTTGTAT_oligo_anneal_tbl_btm
-TTGGGAGAAAGGCAGTCCGCTGCATAAATCTACGCAACAGGTTAGAACCCAAGGCCCGAT
->BridgeRNA_tgt_ATCGGGCCTACGCA_dnr_ACAGTATCTTGTAT_oligo_anneal_dbl_top
-CCAAAGTGATAAACCGGACAGTATCATGGACCGGTTTTCCCGGTAATCCGTATTTACAAGGCTGGTTTCACT
->BridgeRNA_tgt_ATCGGGCCTACGCA_dnr_ACAGTATCTTGTAT_oligo_anneal_dbl_btm
-GGCCAGTGAAACCAGCCTTGTAAATACGGATTACCGGGAAAACCGGTCCATGATACTGTCCGGTTTATCACT
+AGTGCAGGGAGAACCGGCCAGTTCTCTCTGCCATGCGGTCCGCATGCCGTATCGGGCCTTGGGCTAATAACCCGTTGCGTAGATTGGCAGCGGACCGCGCCGTTCTCCACAAGTGACAAACCGGACAGTATCATGGACCGGTTTTCCCGGTAATCCGCATTCACAAGGCTGGTCTCACTTGTGGAGAACG
+>BridgeRNA_tgt_ATCGGGCCTACGCA_dnr_ACAGTATCTTGTAT_split_tbl
+AGTGCAGGGAGAACCGGCCAGTTCTCTCTGCCATGCGGTCCGCATGCCGTATCGGGCCTTGGGCTAATAACCCGTTGCGTAGATTGGCAGCGGACCGC
+>BridgeRNA_tgt_ATCGGGCCTACGCA_dnr_ACAGTATCTTGTAT_split_dbl
+CGTTCTCCACAAGTGACAAACCGGACAGTATCATGGACCGGTTTTCCCGGTAATCCGCATTCACAAGGCTGGTCTCACTTGTGGAGAACG
+```
+
+This should run very quickly on a Mac or Linux machine. There is also an option to output the sequence in Stockholm format with multiple tracks.
+
+```bash
+brna-design --target ATCGGGCCTACGCA --donor ACAGTATCTTGTAT --scaffold IS622_bRNA_enhanced -of stockholm
+```
+
+```bash
+# STOCKHOLM 1.0
+BridgeRNA_tgt_ATCGGGCCTACGCA_dnr_ACAGTATCTTGTAT     AGTGCAGGGAGAACCGGCCAGTTCTCTCTGCCATGCGGTCCGCATGCCGTATCGGGCCTTGGGCTAATAACCCGTTGCGTAGATTGGCAGCGGACCGCGCCGTTCTCCACAAGTGACAAACCGGACAGTATCATGGACCGGTTTTCCCGGTAATCCGCATTCACAAGGCTGGTCTCACTTGTGGAGAACG
+#=GC bRNA_template                                  AGTGCAGGGAGAACCGGCCAGTTCTCTCTGCCATGCGGTCCGCATGCCGTNNNNNNNNNTGGGCTAATAACCCGTNNNNNNNNNTGGCAGCGGACCGCGCCGTTCTCCACAAGTGACAAACCGGNNNNNNNNATGGACCGGTTTTCCCGGTAATCCGCNNTCNNNNNNNTGGTCTCACTTGTGGAGAACG
+#=GC guides                                         ..................................................LLLLLLLCC................RRRRRCCHH........................................lllllllc..........................rr..rrrcchh.....................
+//
 ```
 
 In the `#=GC guides` track, the `L` character indicates the programmable nucleotides of the LTG, the `R` character
@@ -58,5 +51,4 @@ indicates the programmable nucleotides of the RDG, the `c` character indicates t
 donor core, and the `h` character indicates the position of the programmable handshake guide nucleotides.
 
 # Citation
-Please cite [our paper](https://www.biorxiv.org/content/10.1101/2024.01.24.577089v1) if you use any aspect of this 
-code in your work.
+Please cite the linked publications above if you use any aspect of this code in your work.

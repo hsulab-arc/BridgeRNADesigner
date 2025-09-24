@@ -20,19 +20,17 @@ class DonorLengthError(Exception):
         self.message = message
         super().__init__(self.message)
 
-class CoreMismatchError(Exception):
-    def __init__(self, message="That target and donor cores must be the same."):
-        self.message = message
-        super().__init__(self.message)
-
-def DonorP7CWarning():
-    warnings.warn("Donor P7 is C, this was found to be very inefficient in a screen.")
-
-def MatchingP6P7Warning():
-    warnings.warn("Target P6-P7 and Donor P6-P7 match, efficiency is unclear. DBL HSG forced to be anti-complementary.")
-
-def NotCTorGTCoreWarning():
-    warnings.warn("Core is not CT or GT, efficiency is unclear.")
+def CoreMismatchWarning():
+    warnings.warn("The target and donor cores should be identical.")
 
 def NotNTCoreWarning():
-    warnings.warn("Core does not follow the expected NT format, likely inefficient.")
+    warnings.warn("Core does not follow the expected NT format, recombination may not work.")
+
+def P6P7Warning():
+    warnings.warn("Target position 6-7 and donor position 6-7 match, efficiency may be dramatically reduced.")
+
+def P7Warning():
+    warnings.warn("Target position 7 and donor position 7 match, efficiency may be significantly reduced.")
+
+def P6Warning():
+    warnings.warn("Target position 6 and donor position 6 match, efficiency may be reduced.")
