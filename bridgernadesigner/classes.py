@@ -1,21 +1,66 @@
+from abc import ABC, abstractmethod
 from Bio.Seq import reverse_complement
 from bridgernadesigner import errors
 import re
 
-class WTBridgeRNA177nt:
+class BridgeRNAScaffold(ABC):
+    """
+    Abstract base class for Bridge RNA scaffolds.
+    """
+    @property
+    @abstractmethod
+    def TEMPLATE(self):
+        pass
 
-    TEMPLATE = "AGTGCAGAGAAAATCGGCCAGTTTTCTCTGCCTGCAGTCCGCATGCCGTNNNNNNNNNTGGGTTCTAACCTGTNNNNNNNNNTTATGCAGCGGACTGCCTTTCTCCCAAAGTGATAAACCGGNNNNNNNNATGGACCGGTTTTCCCGGTAATCCGTNNTTNNNNNNNTGGTTTCACT"
-    DOT_STRUC_P1 = "...(((((((((((......))))))))))).((((((((((.(((............(((((....)))))..............))))).)))))))).........((((....(((.............((((((.....)))))...)...............)))..))))"
-    DOT_STRUC_P2 = "((.(((((((((((......)))))))))))))(((((((((.(((.............<(((.<>.)))>...............))))))))))))...........((((...<(((..........<.(((((((.....)))))...))....>.........)))>.))))"
-    GUIDES = ".................................................LLLLLLLCC...............RRRRRCCHH........................................lllllllc..........................rr..rrrcchh.........."
+    @property
+    @abstractmethod
+    def GUIDES(self):
+        pass
 
-    LTG_REGION = (49, 58)
-    RTG_REGION = (73, 80)
-    LDG_REGION = (122, 130)
-    RDG1_REGION = (160, 165)
-    RDG2_REGION = (156, 158)
-    TBL_HSG_REGION = (80, 82)
-    DBL_HSG_REGION = (165, 167)
+    @property
+    @abstractmethod
+    def LTG_REGION(self):
+        pass
+
+    @property
+    @abstractmethod
+    def RTG_REGION(self):
+        pass
+
+    @property
+    @abstractmethod
+    def LDG_REGION(self):
+        pass
+
+    @property
+    @abstractmethod
+    def RDG1_REGION(self):
+        pass
+
+    @property
+    @abstractmethod
+    def RDG2_REGION(self):
+        pass
+
+    @property
+    @abstractmethod
+    def TBL_HSG_REGION(self):
+        pass
+
+    @property
+    @abstractmethod
+    def DBL_HSG_REGION(self):
+        pass
+
+    @property
+    @abstractmethod
+    def SPLIT_TBL(self):
+        pass
+
+    @property
+    @abstractmethod
+    def SPLIT_DBL(self):
+        pass
 
     def __init__(self):
         self.bridge_sequence = str(self.TEMPLATE)
@@ -27,8 +72,6 @@ class WTBridgeRNA177nt:
         self.target = target
 
         core = target[7:9]
-        if core not in ["CT", "GT"]:
-            errors.NotCTorGTCoreWarning()
         if core not in ["CT", "GT", "AT", "TT"]:
             errors.NotNTCoreWarning()
 
@@ -41,9 +84,6 @@ class WTBridgeRNA177nt:
 
     def update_donor(self, donor):
         self.donor = donor
-
-        if self.has_donor_p7C():
-            errors.DonorP7CWarning()
 
         bridgeseq = list(self.bridge_sequence)
         bridgeseq[self.LDG_REGION[0]:self.LDG_REGION[1]] = list(donor[:8])
@@ -78,74 +118,42 @@ class WTBridgeRNA177nt:
             raise errors.DonorLengthError()
 
     @staticmethod
-    def check_core_match(target, donor):
-        if target[7:9] != donor[7:9]:
-            raise errors.CoreMismatchError()
-
-    @staticmethod
     def check_donor_is_dna(donor):
         if re.match("^[ATCG]*$", donor) is None:
             raise errors.DonorNotDNAError()
 
-    # @staticmethod
+    @staticmethod
     def check_target_is_dna(target):
         if re.match("^[ATCG]*$", target) is None:
             raise errors.TargetNotDNAError()
 
+    @staticmethod
+    def check_core_mismatch(target, donor):
+        if target[7:9] != donor[7:9]:
+            errors.CoreMismatchWarning()
+
+    @staticmethod
+    def check_p6p7_match(target, donor):
+        if target[5:7] == donor[5:7]:
+            errors.P6P7Warning()
+        elif target[6] == donor[6]:
+            errors.P7Warning()
+        elif target[5] == donor[5]:
+            errors.P6Warning()
+
     def get_p6p7(self):
         return self.target[5:7], self.donor[5:7]
 
-    def has_donor_p7C(self):
-        if self.donor[6] == "C":
-            return True
-        else:
-            return False
-
-    def has_matching_p6p7(self):
-        if self.target[5:7] == self.donor[5:7]:
-            return True
-        else:
-            return False
-
-    def annealing_oligos(self, lh_overhang="TAGC", rh_overhang="GGCC"):
-        fiveprime_stem_loop_top = lh_overhang+self.bridge_sequence[:45]
-        fiveprime_stem_loop_btm = reverse_complement(self.bridge_sequence[:49])
-        tbl_top = self.bridge_sequence[45:105]
-        tbl_btm = reverse_complement(self.bridge_sequence[49:109])
-        dbl_top = self.bridge_sequence[105:177]
-        dbl_btm = rh_overhang+reverse_complement(self.bridge_sequence[109:177])
-
-        return {
-            'fiveprime_stem_loop_top': fiveprime_stem_loop_top,
-            'fiveprime_stem_loop_btm': fiveprime_stem_loop_btm,
-            'tbl_top': tbl_top, 'tbl_btm': tbl_btm,
-            'dbl_top': dbl_top, 'dbl_btm': dbl_btm
-        }
-
-    def format_fasta(self, include_annealing_oligos=False,
-                     lh_overhang="TAGC", rh_overhang="GGCC"):
+    def format_fasta(self):
         out = ">BridgeRNA_tgt_{}_dnr_{}\n".format(self.target, self.donor)
-        out += self.bridge_sequence
-        if include_annealing_oligos:
-            oligos = self.annealing_oligos(lh_overhang, rh_overhang)
-            out += '\n>BridgeRNA_tgt_{}_dnr_{}_oligo_anneal_fiveprime_stem_loop_top\n{}\n'.format(
-                self.target, self.donor, oligos['fiveprime_stem_loop_top']
-            )
-            out += '>BridgeRNA_tgt_{}_dnr_{}_oligo_anneal_fiveprime_stem_loop_btm\n{}\n'.format(
-                self.target, self.donor, oligos['fiveprime_stem_loop_btm']
-            )
-            out += '>BridgeRNA_tgt_{}_dnr_{}_oligo_anneal_tbl_top\n{}\n'.format(
-                self.target, self.donor, oligos['tbl_top']
-            )
-            out += '>BridgeRNA_tgt_{}_dnr_{}_oligo_anneal_tbl_btm\n{}\n'.format(
-                self.target, self.donor, oligos['tbl_btm']
-            )
-            out += '>BridgeRNA_tgt_{}_dnr_{}_oligo_anneal_dbl_top\n{}\n'.format(
-                self.target, self.donor, oligos['dbl_top']
-            )
-            out += '>BridgeRNA_tgt_{}_dnr_{}_oligo_anneal_dbl_btm\n{}'.format(
-                self.target, self.donor, oligos['dbl_btm']
-            )
+        out += self.bridge_sequence + "\n"
+
+        # Include split loops if they are defined for this scaffold
+        if self.SPLIT_TBL is not None and self.SPLIT_DBL is not None:
+            out += ">BridgeRNA_tgt_{}_dnr_{}_split_tbl\n".format(self.target, self.donor)
+            out += self.bridge_sequence[self.SPLIT_TBL[0]:self.SPLIT_TBL[1]] + "\n"
+            out += ">BridgeRNA_tgt_{}_dnr_{}_split_dbl\n".format(self.target, self.donor)
+            out += self.bridge_sequence[self.SPLIT_DBL[0]:self.SPLIT_DBL[1]] + "\n"
 
         return out
 
@@ -158,23 +166,23 @@ class WTBridgeRNA177nt:
         out += template_feat + " "*((leader_cols-len(template_feat))) + self.TEMPLATE + "\n"
         guide_feat = "#=GC guides"
         out += guide_feat + " "*((leader_cols-len(guide_feat))) + self.GUIDES + "\n"
-        ss_feat = "#=GC SS"
-        out += ss_feat + " " * ((leader_cols - len(ss_feat))) + self.DOT_STRUC_P2 + "\n"
 
-        donor_p7 = self.donor[6]
         target_p6p7 = self.target[5:7]
         donor_p6p7 = self.donor[5:7]
-        core = self.target[7:9]
+        target_core = self.target[7:9]
+        donor_core = self.donor[7:9]
 
         warning_feat = "#=GF WARNING"
-        if donor_p7 == 'C':
-            out += warning_feat + " Donor P7 is C, this was found to be very inefficient in a screen.\n"
+        if target_core != 'CT' and target_core != 'GT' and target_core != 'AT' and target_core != 'TT':
+            out += warning_feat + " Core does not follow the expected NT format, recombination may not work.\n"
+        if target_core != donor_core:
+            out += warning_feat + " The target and donor cores should be identical.\n"
         if target_p6p7 == donor_p6p7:
-            out += warning_feat + " Target P6-P7 and Donor P6-P7 match, efficiency is unclear.\n"
-        if core != 'CT' and core != 'GT':
-            out += warning_feat + " Core is not CT or GT, efficiency is unclear.\n"
-        if core != 'CT' and core != 'GT' and core != 'AT' and core != 'TT':
-            out += warning_feat + " Core does not follow the expected NT format, likely inefficient.\n"
+            out += warning_feat + " Target P6-P7 and Donor P6-P7 match, efficiency may be dramatically reduced.\n"
+        elif target_p6p7[1] == donor_p6p7[1]:
+            out += warning_feat + " Target P7 and Donor P7 match, efficiency may be significantly reduced.\n"
+        elif target_p6p7[0] == donor_p6p7[0]:
+            out += warning_feat + " Target P6 and Donor P6 match, efficiency may be reduced.\n"
         out += "//"
         return out
 
@@ -185,3 +193,55 @@ class WTBridgeRNA177nt:
         out += '- Programmed donor: {}\n'.format(self.donor)
         out += '- Bridge RNA sequence: {}'.format(self.bridge_sequence)
         return out
+
+
+class IS621_WT(BridgeRNAScaffold):
+    TEMPLATE = "AGTGCAGAGAAAATCGGCCAGTTTTCTCTGCCTGCAGTCCGCATGCCGTNNNNNNNNNTGGGTTCTAACCTGTNNNNNNNNNTTATGCAGCGGACTGCCTTTCTCCCAAAGTGATAAACCGGNNNNNNNNATGGACCGGTTTTCCCGGTAATCCGTNNTTNNNNNNNTGGTTTCACT"
+    GUIDES   = ".................................................LLLLLLLCC...............RRRRRCCHH........................................lllllllc..........................rr..rrrcchh.........."
+
+    LTG_REGION = (49, 58)
+    RTG_REGION = (73, 80)
+    LDG_REGION = (122, 130)
+    RDG1_REGION = (160, 165)
+    RDG2_REGION = (156, 158)
+    TBL_HSG_REGION = (80, 82)
+    DBL_HSG_REGION = (165, 167)
+    SPLIT_TBL = None
+    SPLIT_DBL = None
+
+
+class IS622_WT(BridgeRNAScaffold):
+    TEMPLATE = "AGTGCAGGGAGAACCGGCCAGTTCTCTCTGCCATGCGGTCCGCATGCCGTNNNNNNNNNCAGGCTAATAACCTGTNNNNNNNNNTTATGCAGCGGACCGCCGTTCTCCACAAGTGACAAACCGGNNNNNNNNATGGACCGGTTTTCCCGGTAATCCGCNNTCNNNNNNNTGGTCTCACT"
+    GUIDES   = "..................................................LLLLLLLCC................RRRRRCCHH........................................lllllllc..........................rr..rrrcchh.........."
+
+    LTG_REGION = (50, 59)
+    RTG_REGION = (75, 82)
+    LDG_REGION = (124, 132)
+    RDG1_REGION = (162, 167)
+    RDG2_REGION = (158, 160)
+    TBL_HSG_REGION = (82, 84)
+    DBL_HSG_REGION = (167, 169)
+    SPLIT_TBL = (0, 100)
+    SPLIT_DBL = (111, 179)
+
+
+class IS622_enhanced(BridgeRNAScaffold):
+    TEMPLATE = "AGTGCAGGGAGAACCGGCCAGTTCTCTCTGCCATGCGGTCCGCATGCCGTNNNNNNNNNTGGGCTAATAACCCGTNNNNNNNNNTGGCAGCGGACCGCGCCGTTCTCCACAAGTGACAAACCGGNNNNNNNNATGGACCGGTTTTCCCGGTAATCCGCNNTCNNNNNNNTGGTCTCACTTGTGGAGAACG"
+    GUIDES   = "..................................................LLLLLLLCC................RRRRRCCHH........................................lllllllc..........................rr..rrrcchh....................."
+
+    LTG_REGION = (50, 59)
+    RTG_REGION = (75, 82)
+    LDG_REGION = (124, 132)
+    RDG1_REGION = (162, 167)
+    RDG2_REGION = (158, 160)
+    TBL_HSG_REGION = (82, 84)
+    DBL_HSG_REGION = (167, 169)
+    SPLIT_TBL = (0, 98)
+    SPLIT_DBL = (100, 190)
+
+
+SCAFFOLD_NAME_TO_CLASS = {
+    'IS621_bRNA': IS621_WT,
+    'IS622_bRNA_WT': IS622_WT,
+    'IS622_bRNA_enhanced': IS622_enhanced,
+}

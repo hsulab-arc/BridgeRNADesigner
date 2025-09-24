@@ -1,21 +1,24 @@
-from bridgernadesigner.classes import WTBridgeRNA177nt
-from bridgernadesigner import errors
+from bridgernadesigner.classes import SCAFFOLD_NAME_TO_CLASS
 
-def design_bridge_rna(target, donor):
 
+def design_bridge_rna(target, donor, scaffold):
     target = target.upper()
     donor = donor.upper()
+    brna_scaffold = SCAFFOLD_NAME_TO_CLASS[scaffold]
 
-    WTBridgeRNA177nt.check_target_length(target)
-    WTBridgeRNA177nt.check_donor_length(donor)
-    WTBridgeRNA177nt.check_core_match(target, donor)
-    WTBridgeRNA177nt.check_target_is_dna(target)
-    WTBridgeRNA177nt.check_donor_is_dna(donor)
+    # Hard checks, will raise errors if not met
+    brna_scaffold.check_target_length(target)
+    brna_scaffold.check_donor_length(donor)
+    brna_scaffold.check_target_is_dna(target)
+    brna_scaffold.check_donor_is_dna(donor)
 
-    brna = WTBridgeRNA177nt()
+    # Warning if not met
+    brna_scaffold.check_core_mismatch(target, donor)
+    brna_scaffold.check_p6p7_match(target, donor)
+
+    brna = brna_scaffold()
     brna.update_target(target)
     brna.update_donor(donor)
     brna.update_hsg()
 
     return brna
-
