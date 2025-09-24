@@ -6,8 +6,8 @@ with open('README.md') as f:
 
 setup(
     name="bridgernadesigner",
-    version='0.0.1',
-    description='Software package to design bridge RNAs as described by Durrant & Perry et al. 2024',
+    version='0.0.2',
+    description='Software package to design bridge RNAs as described by Durrant & Perry et al. 2024 and Perry et al. 2025',
     long_description=long_description,
     long_description_content_type="text/markdown",
     url='https://github.com/hsulab-arc/BridgeRNADesigner',
