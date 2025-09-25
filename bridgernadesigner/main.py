@@ -7,7 +7,7 @@ from bridgernadesigner.classes import SCAFFOLD_NAME_TO_CLASS
 @click.group(invoke_without_command=True)
 @click.option('--target', '-t', required=True, help="14nt target sequence")
 @click.option('--donor', '-d', required=True, help="14nt donor sequence")
-@click.option('--scaffold', '-s', required=True, type=click.Choice(['IS621_bRNA', 'IS622_bRNA_WT', 'IS622_bRNA_enhanced']), help="Template bridge RNA scaffold")
+@click.option('--scaffold', '-s', required=True, type=click.Choice(['IS621', 'ISCro4_WT', 'ISCro4_enhanced']), help="Template bridge RNA scaffold")
 @click.option('--output-format', '-of', default='fasta', type=click.Choice(['fasta', 'stockholm']))
 @click.pass_context
 def cli(ctx, target, donor, scaffold, output_format):

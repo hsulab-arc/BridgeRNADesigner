@@ -24,5 +24,5 @@ setup(
         'console_scripts': [
             'brna-design = bridgernadesigner.main:cli'
         ]
-}
-)
+    }
+    )

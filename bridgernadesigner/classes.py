@@ -64,6 +64,7 @@ class BridgeRNAScaffold(ABC):
 
     def __init__(self):
         self.bridge_sequence = str(self.TEMPLATE)
+        self.scaffold_name = self.__class__.__name__
         self.target = None
         self.donor = None
 
@@ -101,7 +102,7 @@ class BridgeRNAScaffold(ABC):
             bridgeseq[self.TBL_HSG_REGION[0]:self.TBL_HSG_REGION[1]] = list(reverse_complement(donor_p6p7))
             bridgeseq[self.DBL_HSG_REGION[0]:self.DBL_HSG_REGION[1]] = list(reverse_complement(target_p6p7))
         else:
-            errors.MatchingP6P7Warning()
+            errors.P6P7Warning()
             bridgeseq[self.TBL_HSG_REGION[0]:self.TBL_HSG_REGION[1]] = list(reverse_complement(donor_p6p7))
             bridgeseq[self.DBL_HSG_REGION[0]:self.DBL_HSG_REGION[1]] = list(target_p6p7)
 
@@ -145,20 +146,20 @@ class BridgeRNAScaffold(ABC):
         return self.target[5:7], self.donor[5:7]
 
     def format_fasta(self):
-        out = ">BridgeRNA_tgt_{}_dnr_{}\n".format(self.target, self.donor)
+        out = ">BridgeRNA_tgt_{}_dnr_{}_scaffold_{}\n".format(self.target, self.donor, self.scaffold_name)
         out += self.bridge_sequence + "\n"
 
         # Include split loops if they are defined for this scaffold
         if self.SPLIT_TBL is not None and self.SPLIT_DBL is not None:
-            out += ">BridgeRNA_tgt_{}_dnr_{}_split_tbl\n".format(self.target, self.donor)
+            out += ">BridgeRNA_tgt_{}_dnr_{}_scaffold_{}_split_tbl\n".format(self.target, self.donor, self.scaffold_name)
             out += self.bridge_sequence[self.SPLIT_TBL[0]:self.SPLIT_TBL[1]] + "\n"
-            out += ">BridgeRNA_tgt_{}_dnr_{}_split_dbl\n".format(self.target, self.donor)
+            out += ">BridgeRNA_tgt_{}_dnr_{}_scaffold_{}_split_dbl\n".format(self.target, self.donor, self.scaffold_name)
             out += self.bridge_sequence[self.SPLIT_DBL[0]:self.SPLIT_DBL[1]] + "\n"
 
         return out
 
     def format_stockholm(self, whitespaces=5):
-        seqname = "BridgeRNA_tgt_{}_dnr_{}".format(self.target, self.donor)
+        seqname = "BridgeRNA_tgt_{}_dnr_{}_scaffold_{}".format(self.target, self.donor, self.scaffold_name)
         leader_cols = len(seqname)+whitespaces
         out = "# STOCKHOLM 1.0\n"
         out += seqname+" "*(leader_cols-len(seqname))+self.bridge_sequence+"\n"
@@ -195,7 +196,7 @@ class BridgeRNAScaffold(ABC):
         return out
 
 
-class IS621_WT(BridgeRNAScaffold):
+class IS621(BridgeRNAScaffold):
     TEMPLATE = "AGTGCAGAGAAAATCGGCCAGTTTTCTCTGCCTGCAGTCCGCATGCCGTNNNNNNNNNTGGGTTCTAACCTGTNNNNNNNNNTTATGCAGCGGACTGCCTTTCTCCCAAAGTGATAAACCGGNNNNNNNNATGGACCGGTTTTCCCGGTAATCCGTNNTTNNNNNNNTGGTTTCACT"
     GUIDES   = ".................................................LLLLLLLCC...............RRRRRCCHH........................................lllllllc..........................rr..rrrcchh.........."
 
@@ -210,7 +211,7 @@ class IS621_WT(BridgeRNAScaffold):
     SPLIT_DBL = None
 
 
-class IS622_WT(BridgeRNAScaffold):
+class ISCro4_WT(BridgeRNAScaffold):
     TEMPLATE = "AGTGCAGGGAGAACCGGCCAGTTCTCTCTGCCATGCGGTCCGCATGCCGTNNNNNNNNNCAGGCTAATAACCTGTNNNNNNNNNTTATGCAGCGGACCGCCGTTCTCCACAAGTGACAAACCGGNNNNNNNNATGGACCGGTTTTCCCGGTAATCCGCNNTCNNNNNNNTGGTCTCACT"
     GUIDES   = "..................................................LLLLLLLCC................RRRRRCCHH........................................lllllllc..........................rr..rrrcchh.........."
 
@@ -225,7 +226,7 @@ class IS622_WT(BridgeRNAScaffold):
     SPLIT_DBL = (111, 179)
 
 
-class IS622_enhanced(BridgeRNAScaffold):
+class ISCro4_enhanced(BridgeRNAScaffold):
     TEMPLATE = "AGTGCAGGGAGAACCGGCCAGTTCTCTCTGCCATGCGGTCCGCATGCCGTNNNNNNNNNTGGGCTAATAACCCGTNNNNNNNNNTGGCAGCGGACCGCGCCGTTCTCCACAAGTGACAAACCGGNNNNNNNNATGGACCGGTTTTCCCGGTAATCCGCNNTCNNNNNNNTGGTCTCACTTGTGGAGAACG"
     GUIDES   = "..................................................LLLLLLLCC................RRRRRCCHH........................................lllllllc..........................rr..rrrcchh....................."
 
@@ -241,7 +242,7 @@ class IS622_enhanced(BridgeRNAScaffold):
 
 
 SCAFFOLD_NAME_TO_CLASS = {
-    'IS621_bRNA': IS621_WT,
-    'IS622_bRNA_WT': IS622_WT,
-    'IS622_bRNA_enhanced': IS622_enhanced,
+    'IS621': IS621,
+    'ISCro4_WT': ISCro4_WT,
+    'ISCro4_enhanced': ISCro4_enhanced,
 }
