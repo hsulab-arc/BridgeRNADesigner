@@ -97,14 +97,8 @@ class BridgeRNAScaffold(ABC):
         bridgeseq = list(self.bridge_sequence)
 
         target_p6p7, donor_p6p7 = self.get_p6p7()
-
-        if target_p6p7 != donor_p6p7:
-            bridgeseq[self.TBL_HSG_REGION[0]:self.TBL_HSG_REGION[1]] = list(reverse_complement(donor_p6p7))
-            bridgeseq[self.DBL_HSG_REGION[0]:self.DBL_HSG_REGION[1]] = list(reverse_complement(target_p6p7))
-        else:
-            errors.P6P7Warning()
-            bridgeseq[self.TBL_HSG_REGION[0]:self.TBL_HSG_REGION[1]] = list(reverse_complement(donor_p6p7))
-            bridgeseq[self.DBL_HSG_REGION[0]:self.DBL_HSG_REGION[1]] = list(target_p6p7)
+        bridgeseq[self.TBL_HSG_REGION[0]:self.TBL_HSG_REGION[1]] = list(reverse_complement(donor_p6p7))
+        bridgeseq[self.DBL_HSG_REGION[0]:self.DBL_HSG_REGION[1]] = list(reverse_complement(target_p6p7))
 
         self.bridge_sequence = "".join(bridgeseq)
 
